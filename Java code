@@ -1,0 +1,89 @@
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class MainForm extends JFrame {
+    // Components for Form 1
+    private JButton uploadButton;
+    // Components for Form 2
+    private JTextField dateField, uniqueNoField, qtyField, priceField, totalField, discountField, totalAfterDiscountField, finalPriceField;
+    private JComboBox<String> companyNameComboBox, productNameComboBox, gstComboBox;
+    private Connection connection;
+
+    public MainForm() {
+        // Initialize connection to database
+        try {
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/yourdatabase", "username", "password");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Form 1
+        uploadButton = new JButton("Upload Excel");
+        uploadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Implement Excel upload functionality here
+            }
+        });
+
+        // Form 2
+        // Initialize and populate company name dropdown
+        companyNameComboBox = new JComboBox<>();
+        // Populate companyNameComboBox from SQL table
+
+        // Initialize and populate product name dropdown
+        productNameComboBox = new JComboBox<>();
+        // Populate productNameComboBox from SQL table
+
+        // Initialize and populate GST dropdown
+        gstComboBox = new JComboBox<>(new String[]{"GST 18%", "GST 28%", "GST 12%"});
+
+        // Other components initialization...
+
+        // Handle form submission
+        JButton submitButton = new JButton("Submit");
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    insertFormDataIntoDatabase();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        // Layout setup...
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
+    }
+
+    private void insertFormDataIntoDatabase() throws SQLException {
+        String sql = "INSERT INTO your_table_name (date, unique_no, company_name, product_name, qty, price, total, discount, total_after_discount, gst, cgst, sgst, igst, final_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1, dateField.getText());
+        statement.setString(2, uniqueNoField.getText());
+        statement.setString(3, (String) companyNameComboBox.getSelectedItem());
+        statement.setString(4, (String) productNameComboBox.getSelectedItem());
+        statement.setInt(5, Integer.parseInt(qtyField.getText()));
+        statement.setDouble(6, Double.parseDouble(priceField.getText()));
+        // Set other values similarly
+        statement.executeUpdate();
+        JOptionPane.showMessageDialog(this, "Data inserted successfully!");
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new MainForm();
+            }
+        });
+    }
+}
